@@ -11,8 +11,31 @@ module.exports.getAllHotels = (req,res,next)=>{
             });
         }
         else {
-            res.status(200).set('application/json')
-            .json(response);
+            let requiredHotels = [];
+            var city = {
+                hotels: requiredHotels
+            }
+            if(req.query && req.query.city) {
+                for(h of response) {
+                    if(h.location.address.includes(req.query.city)) {
+                        requiredHotels.push(h);
+                    }
+                }
+                if(requiredHotels.length>0) {
+                    res.status(200).set('application/json')
+                    .json(city);
+                }
+                else {
+                    res.status(404).set('application/json')
+                    .json({
+                        message:"No Hotels Found"
+                    })
+                }
+            }
+            else {
+                res.status(200).set('application/json')
+                .json(response);
+            }
         }
     });
 }
