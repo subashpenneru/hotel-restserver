@@ -71,8 +71,8 @@ module.exports.login = (req,res,next)=>{
                     .json({
                         auth:true,
                         message:"Login Successfull",
-                        token:token
-                        // user:user
+                        token:token,
+                        user:user
                     })
                 }
                 else {

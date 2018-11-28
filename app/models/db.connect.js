@@ -14,6 +14,7 @@ mongoose.connect(CONFIG.DBURL,options);
 var db = mongoose.connection;
 db.on('error',(err)=>{
     console.log("DB Connection Failed via Mongoose");
+    console.log(err);
     
 })
 db.once('open',()=>{
