@@ -159,10 +159,14 @@ module.exports.fileFilter = (req, file, cb) => {
     }
 }
 
-module.exports.uploadPhoto = (req,res,next)=>{
+module.exports.updateUser = (req,res,next)=>{
     if(req.params.userId) {
         console.log(req.file);
-        User.findByIdAndUpdate(req.params.userId,{userImage:req.file.path},(error,response)=>{
+        User.findByIdAndUpdate(req.params.userId,{
+            firstname:req.body.firstname,
+            lastname:req.body.lastname,
+            userImage:req.file.path
+        },(error,response)=>{
             if(error) {
                 res.status(500).set('application/json')
                 .json({
