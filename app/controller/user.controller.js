@@ -2,12 +2,15 @@ var mongoose = require('mongoose');
 var bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 const CONFIG = require('../config/config');
+const multer = require('multer');
+
 
 var User = mongoose.model('User');
 
 module.exports.register = (req,res,next)=>{
     if(req.body && req.body.firstname && req.body.email && req.body.password) {
-
+        console.log(req.body);
+        
         const saltRounds = 10;
         var salt = bcrypt.genSaltSync(saltRounds);
         var hashPwd = bcrypt.hashSync(req.body.password,salt);
@@ -16,7 +19,8 @@ module.exports.register = (req,res,next)=>{
             firstname:req.body.firstname,
             lastname:req.body.lastname,
             email:req.body.email,
-            password:hashPwd
+            password:hashPwd,
+            userImage:req.file.path
         });
         
         user.save((err,user)=>{
@@ -135,4 +139,63 @@ module.exports.tokenValidator = (req,res,next)=>{
             }
         });
     }
+}
+
+module.exports.storage = multer.diskStorage({
+    destination: function(req, file, callback) {
+        callback(null, './uploads');
+    },
+    filename: function(req, file, cb) {
+        cb(null, new Date().toISOString() + file.originalname);
+    }
+});
+
+module.exports.fileFilter = (req, file, cb) => {
+    if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg' || file.mimetype === 'image/png') {
+        cb(null, true);
+    }
+    else {
+        cb(null, false);
+    }
+}
+
+module.exports.uploadPhoto = (req,res,next)=>{
+    if(req.params.userId) {
+        console.log(req.file);
+        User.findByIdAndUpdate(req.params.userId,{userImage:req.file.path},(error,response)=>{
+            if(error) {
+                res.status(500).set('application/json')
+                .json({
+                    error:error
+                });
+            }
+            else {
+                res.status(200).set('application/json')
+                .json(response)
+            }
+        });
+    }
+    else {
+        res.status(500).set('application/json')
+        .json({
+            message:"required fields are missing"
+        });
+    }
+}
+
+module.exports.getImage = (req,res,next)=>{
+    userId = req.params.userId;
+
+    User.findById(userId,(error,response)=>{
+        if(error) {
+            res.status(500).set('application/json')
+                .json({
+                    error:error
+                });
+        }
+        else {
+            res.status(200).set('application/json')
+            .json(response.userImage)
+        }
+    });
 }

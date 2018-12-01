@@ -11,6 +11,9 @@ var userSchema = mongoose.Schema({
     password:{
         type:String,
         required:true
+    },
+    userImage: {
+        type: String
     }
 });
 

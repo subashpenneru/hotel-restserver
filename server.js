@@ -9,6 +9,7 @@ var hotelRoutes = require('./app/routes/hotel.routes');
 
 app.use(bodyparser.urlencoded({extended:false}));
 app.use(bodyparser.json());
+app.use('/api/user/uploads', express.static('uploads'))
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
