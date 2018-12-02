@@ -10,6 +10,18 @@ var User = mongoose.model('User');
 module.exports.register = (req,res,next)=>{
     if(req.body && req.body.firstname && req.body.email && req.body.password) {
         console.log(req.body);
+        if(req.body.userImage == 'null') {
+            req.file = {
+                fieldname: 'userImage',
+                originalname: 'khaleesi.jpg',
+                encoding: '7bit',
+                mimetype: 'image/jpeg',
+                destination: './uploads',
+                filename: '2018-12-02T02:16:06.010Zkhaleesi.jpg',
+                path: 'uploads/2018-12-02T02:16:06.010Zkhaleesi.jpg',
+                size: 73151
+            }
+        }
         
         const saltRounds = 10;
         var salt = bcrypt.genSaltSync(saltRounds);
@@ -146,7 +158,7 @@ module.exports.storage = multer.diskStorage({
         callback(null, './uploads');
     },
     filename: function(req, file, cb) {
-        cb(null, new Date().toISOString() + file.originalname);
+        cb(null, file.originalname);
     }
 });
 
@@ -161,7 +173,21 @@ module.exports.fileFilter = (req, file, cb) => {
 
 module.exports.updateUser = (req,res,next)=>{
     if(req.params.userId) {
-        console.log(req.file);
+        console.log(req.body)
+        if(typeof req.body.userImage == 'string') {
+            oName = req.body.userImage.split('/');
+            req.file = {
+                fieldname: 'userImage',
+                originalname: oName[1],
+                encoding: '7bit',
+                mimetype: 'image/jpeg',
+                destination: './uploads',
+                filename: '2018-12-02T02:16:06.010Zkhaleesi.jpg',
+                path: req.body.userImage,
+                size: 73151
+            }
+        }
+
         User.findByIdAndUpdate(req.params.userId,{
             firstname:req.body.firstname,
             lastname:req.body.lastname,
