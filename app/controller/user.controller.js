@@ -17,8 +17,8 @@ module.exports.register = (req,res,next)=>{
                 encoding: '7bit',
                 mimetype: 'image/jpeg',
                 destination: './uploads',
-                filename: '2018-12-02T02:16:06.010Zkhaleesi.jpg',
-                path: 'uploads/2018-12-02T02:16:06.010Zkhaleesi.jpg',
+                filename: 'khaleesi.jpg',
+                path: 'uploads/khaleesi.jpg',
                 size: 73151
             }
         }
@@ -32,7 +32,8 @@ module.exports.register = (req,res,next)=>{
             lastname:req.body.lastname,
             email:req.body.email,
             password:hashPwd,
-            userImage:req.file.path
+            userImage:req.file.path,
+            role:req.body.role
         });
         
         user.save((err,user)=>{

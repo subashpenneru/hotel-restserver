@@ -14,7 +14,8 @@ var userSchema = mongoose.Schema({
     },
     userImage: {
         type: String
-    }
+    },
+    role:String
 });
 
 mongoose.model('User',userSchema,'users');
