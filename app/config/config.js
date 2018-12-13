@@ -7,7 +7,9 @@ const dbUrl = "mongodb://hotel:subash1995@ds117334.mlab.com:17334/bot"
 const authSource = 'bot';
 const dbUser = 'hotel';
 const dbPass = 'subash1995';
-const secretekey = "ThisisSubashPenneru"
+const secretekey = "ThisisSubashPenneru";
+const userName = "subashpenneru@gmail.com";
+const password = "nani1995subash";
 
 module.exports = {
     HOST:host,
@@ -16,5 +18,7 @@ module.exports = {
     AUTHSOURCE:authSource,
     DBUSER:dbUser,
     dbPass:dbPass,
-    SECRETKEY:secretekey
+    SECRETKEY:secretekey,
+    mailUser:userName,
+    mailPass:password
 }

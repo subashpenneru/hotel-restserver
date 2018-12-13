@@ -15,7 +15,11 @@ var userSchema = mongoose.Schema({
     userImage: {
         type: String
     },
-    role:String
+    role:String,
+    isActive:{
+        type: Boolean,
+        required: true
+    }
 });
 
 mongoose.model('User',userSchema,'users');

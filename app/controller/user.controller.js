@@ -3,7 +3,7 @@ var bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 const CONFIG = require('../config/config');
 const multer = require('multer');
-
+var nodemailer = require('nodemailer');
 
 var User = mongoose.model('User');
 
@@ -26,14 +26,15 @@ module.exports.register = (req,res,next)=>{
         const saltRounds = 10;
         var salt = bcrypt.genSaltSync(saltRounds);
         var hashPwd = bcrypt.hashSync(req.body.password,salt);
-
+        var isUserActive = false
         var user = new User({
             firstname:req.body.firstname,
             lastname:req.body.lastname,
             email:req.body.email,
             password:hashPwd,
             userImage:req.file.path,
-            role:req.body.role
+            role:req.body.role,
+            isActive:isUserActive
         });
         
         user.save((err,user)=>{
@@ -51,6 +52,38 @@ module.exports.register = (req,res,next)=>{
                     auth:true,
                     message:"user registration successfull",
                     token:token
+                });
+                var transporter = nodemailer.createTransport({
+                    service: "gmail",
+                    secure: false,
+                    port: 25,
+                    auth: {
+                        user: CONFIG.mailUser,
+                        pass: CONFIG.mailPass
+                    },
+                    tls: {
+                        rejectUnauthorized: false
+                    }
+                });
+
+                var mailOptions = {
+                    from: CONFIG.mailUser,
+                    to: req.body.email,
+                    subject: "Welcome to Hotel! Confirm your mail to continue",
+                    html: `<h1>Welcome to MyHotel</h1>
+                        <p>confirm your mail <a href="http://localhost:4200/confirmMail?emailId=${user._id}">by clicking this link</a></p>
+                        <p>This is the best website to book a hotel at low prizes</p>`
+                };
+
+                transporter.sendMail(mailOptions, (error, info)=>{
+                    if(error) {
+                        console.log(error);
+                        
+                    }
+                    else {
+                        console.log("Email Sent: "+ info.response);
+                        
+                    }
                 });
             }
         })
@@ -83,14 +116,22 @@ module.exports.login = (req,res,next)=>{
             else {
                 var isPwd = bcrypt.compareSync(req.body.password,user.password);
                 if(isPwd) {
-                    var token = jwt.sign({_id:user._id},CONFIG.SECRETKEY,{expiresIn:"24h"})
-                    res.status(200).set('application/json')
-                    .json({
-                        auth:true,
-                        message:"Login Successfull",
-                        token:token,
-                        user:user
-                    })
+                    if(user.isActive) {
+                        var token = jwt.sign({_id:user._id},CONFIG.SECRETKEY,{expiresIn:"24h"})
+                        res.status(200).set('application/json')
+                        .json({
+                            auth:true,
+                            message:"Login Successfull",
+                            token:token,
+                            user:user
+                        })
+                    }
+                    else {
+                        res.status(500).set('application/json')
+                        .json({
+                            message:"please confirm your account to Login"
+                        })
+                    } 
                 }
                 else {
                     res.status(500).set('application/json')
@@ -227,6 +268,27 @@ module.exports.getImage = (req,res,next)=>{
         else {
             res.status(200).set('application/json')
             .json(response.userImage)
+        }
+    });
+}
+
+module.exports.updateRegUser = (req,res,next)=>{
+    console.log(req.body.isActive);
+    
+    User.findByIdAndUpdate(req.query.emailId, {
+        isActive: req.body.isActive
+    },(error,resp)=>{
+        if(error) {
+            res.status(500).set('application/json')
+            .json({
+                error:error,
+            });
+        }
+        else {
+            res.status(200).set('application/json')
+            .json({
+                response:resp,
+            });
         }
     });
 }

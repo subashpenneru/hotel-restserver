@@ -14,5 +14,6 @@ router.route('/user/login').post(userCtrl.login);
 router.route('/user/:userId')
 .get(userCtrl.getImage)
 .post(upload.single('userImage'), userCtrl.updateUser);
+router.route('/user').post(userCtrl.updateRegUser);
 
 module.exports = router;
