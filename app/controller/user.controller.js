@@ -292,3 +292,48 @@ module.exports.updateRegUser = (req,res,next)=>{
         }
     });
 }
+
+module.exports.tokenValidation = (req,res,next)=>{
+    var token = req.headers['user-access-token'];
+    if(!token) {
+        res.status(404).set('application/json')
+        .json({
+            auth:false,
+            token:null,
+            message:"Failed to authenticate, Token not Found"
+        });
+    }
+    else {
+        jwt.verify(token,CONFIG.SECRETKEY,(error,doc)=>{
+            if(error) {
+                res.status(401).set('application/json')
+                .json({
+                    error:error,
+                    message:"Failed to authenticate, Unauthorized token"
+                });
+            }
+            else {
+                User.findById(doc._id).exec((error,user)=>{
+                    if(error) {
+                        res.status(500).set('application/json')
+                        .json({
+                            error:error,
+                            message:"Failed to find a user via token"
+                        })
+                    }
+                    else if(!user) {
+                        res.status(404).set('application/json')
+                        .json({
+                            error:error,
+                            message:"User not found via token id"
+                        })
+                    }
+                    else {
+                       res.status(200).set('application/json')
+                       .json(user)
+                    }
+                });
+            }
+        });
+    }
+}

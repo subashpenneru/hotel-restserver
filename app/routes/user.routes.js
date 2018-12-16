@@ -10,10 +10,15 @@ const upload = multer({storage: userCtrl.storage,
 });
 
 router.route('/user/register').post(upload.single('userImage'), userCtrl.register);
+
 router.route('/user/login').post(userCtrl.login);
+
 router.route('/user/:userId')
-.get(userCtrl.getImage)
-.post(upload.single('userImage'), userCtrl.updateUser);
-router.route('/user').post(userCtrl.updateRegUser);
+    .get(userCtrl.getImage)
+    .post(upload.single('userImage'), userCtrl.updateUser);
+
+router.route('/user')
+    .post(userCtrl.updateRegUser)
+    .get(userCtrl.tokenValidation);
 
 module.exports = router;
