@@ -10,7 +10,7 @@ const upload = multer({storage: userCtrl.storage,
     fileFilter: userCtrl.fileFilter
 });
 
-router.route('/user/register').post(upload.single('userImage'), userCtrl1.register);
+router.route('/user/register').post(upload.single('userImage'), userCtrl.register);
 
 router.route('/user/login').post(userCtrl.login);
 

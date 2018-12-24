@@ -9,4 +9,7 @@ router.route('/hotels')
 router.route('/hotels/:hotelId')
 .get(userCtrl.tokenValidator, hotelCtrl.getOneHotel);
 
+router.route('/hotels/:hotelId/:userId')
+.post(hotelCtrl.bookHotel);
+
 module.exports = router;
