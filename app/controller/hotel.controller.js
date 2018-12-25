@@ -74,29 +74,18 @@ module.exports.getOneHotel = (req,res,next)=>{
 module.exports.bookHotel = (req,res,next)=>{
     hotelId = req.params.hotelId;
     userId = req.params.userId;
-    console.log(req.body);
     
     findOneHotelOneUser(hotelId, userId).then(data=>{
 
-        // var bookingHistory = {
-        //     userName: req.body.userName,
-        //     emailId: req.body.email,
-        //     phNo: req.body.mobile,
-        //     hotelName: data.hotel.name,
-        //     bookingDate: new Date(),
-        //     price: data.hotel.rooms[0].price
-        // };
-
         if(data.user._id) {
-            User.findByIdAndUpdate(data.user._id, {$push: {
-                userName: req.body.userName,
-                emailId: req.body.email,
-                phNo: req.body.mobile,
-                hotelName: data.hotel.name,
-                bookingDate: new Date(),
-                price: data.hotel.rooms[0].price
-
-            }}, {new:true}, (err,doc)=>{
+            User.findOneAndUpdate({_id:data.user._id}, {$push: {bookingHistory: {
+                    userName: req.body.userName,
+                    emailId: req.body.email,
+                    phNo: req.body.mobile,
+                    hotelName: data.hotel.name,
+                    bookingDate: new Date(),
+                    price: data.hotel.rooms[0].price
+                }}}, {new:true}, (err,doc)=>{
                 if(err) {
                     res.status(500).set('application/json')
                     .json({
