@@ -5,6 +5,26 @@ const CONFIG = require('../config/config');
 const multer = require('multer');
 var nodemailer = require('nodemailer');
 
+// OTPLIB
+var otplib = require('otplib');
+
+// TWILIO ACCOUNT
+const accSid = process.env.TWILIO_ACC_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = require('twilio')(accSid,authToken);
+
+// SEND SMS USING SPRINGEDGE.......
+/* var springedge = require('springedge');
+var params = {
+    "apikey": "6u69665t3171ar1eqlberiv452ozenafh",
+    "sender": "SEDEMO",
+    "to": [
+        "917095692523"
+    ],
+    "message": "test+message",
+    "format": "json"
+}; */
+
 var User = mongoose.model('User');
 
 module.exports.register = (req,res,next)=>{
@@ -114,6 +134,8 @@ module.exports.login = (req,res,next)=>{
                 });
             }
             else {
+                const otpToken = otplib.authenticator.generate(process.env.SECRET_KET_OTP);
+
                 var isPwd = bcrypt.compareSync(req.body.password,user.password);
                 if(isPwd) {
                     if(user.isActive) {
@@ -124,7 +146,22 @@ module.exports.login = (req,res,next)=>{
                             message:"Login Successfull",
                             token:token,
                             user:user
-                        })
+                        });
+
+                        /* springedge.messages.send(params,5000,(err,resp)=>{
+                            if(err) {
+                                console.log(err);
+                                
+                            }
+                            console.log(resp);
+                            
+                        }); */
+                        // SMS SEND USING TWILIO
+                        client.messages.create({
+                            to: process.env.MY_PHONE_NUM,
+                            from: '+18507907398',
+                            body: `first sms from my node js project - SUBASH OTP--${otpToken}`
+                        });
                     }
                     else {
                         res.status(500).set('application/json')
