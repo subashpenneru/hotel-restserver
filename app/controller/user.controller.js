@@ -8,6 +8,10 @@ var nodemailer = require('nodemailer');
 // OTPLIB
 var otplib = require('otplib');
 
+// SENDOTP ACCOUNT
+const Sendotp = require('sendotp');
+const sendOtp = new Sendotp('254044A0l4DbFs5c270278'); 
+
 // TWILIO ACCOUNT
 const accSid = process.env.TWILIO_ACC_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -156,11 +160,22 @@ module.exports.login = (req,res,next)=>{
                             console.log(resp);
                             
                         }); */
+
                         // SMS SEND USING TWILIO
                         client.messages.create({
                             to: process.env.MY_PHONE_NUM,
                             from: '+18507907398',
                             body: `first sms from my node js project - SUBASH OTP--${otpToken}`
+                        });
+
+                        // SEND OTP USING SENDOTP
+                        sendOtp.send(process.env.MY_PHONE_NUM, "SHOTEL", (err,data)=>{
+                            if(err) {
+                                console.log(err);
+                            }
+                            else {
+                                console.log(data);
+                            } 
                         });
                     }
                     else {
