@@ -29,7 +29,8 @@ var userSchema = mongoose.Schema({
         type: Boolean,
         required: true
     },
-    bookingHistory: [bookingHistorySchema]
+    bookingHistory: [bookingHistorySchema],
+    phoneNumber:String
 });
 
 mongoose.model('User',userSchema,'users');

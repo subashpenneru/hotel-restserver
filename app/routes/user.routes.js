@@ -14,6 +14,10 @@ router.route('/user/register').post(upload.single('userImage'), userCtrl.registe
 
 router.route('/user/login').post(userCtrl.login);
 
+router.route('/user/login/mobile')
+    .post(userCtrl.loginViaOtp)
+    .put(userCtrl.viaOTP)
+
 router.route('/user/:userId')
     .get(userCtrl.getImage)
     .post(upload.single('userImage'), userCtrl.updateUser);

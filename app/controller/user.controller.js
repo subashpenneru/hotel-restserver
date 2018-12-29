@@ -138,7 +138,7 @@ module.exports.login = (req,res,next)=>{
                 });
             }
             else {
-                const otpToken = otplib.authenticator.generate(process.env.SECRET_KET_OTP);
+                // const otpToken = otplib.authenticator.generate(process.env.SECRET_KET_OTP);
 
                 var isPwd = bcrypt.compareSync(req.body.password,user.password);
                 if(isPwd) {
@@ -162,21 +162,21 @@ module.exports.login = (req,res,next)=>{
                         }); */
 
                         // SMS SEND USING TWILIO
-                        client.messages.create({
+                        /* client.messages.create({
                             to: process.env.MY_PHONE_NUM,
                             from: '+18507907398',
                             body: `first sms from my node js project - SUBASH OTP--${otpToken}`
-                        });
+                        }); */
 
                         // SEND OTP USING SENDOTP
-                        sendOtp.send(process.env.MY_PHONE_NUM, "SHOTEL", (err,data)=>{
+                        /* sendOtp.send(process.env.MY_PHONE_NUM, "SHOTEL", (err,data)=>{
                             if(err) {
                                 console.log(err);
                             }
                             else {
                                 console.log(data);
                             } 
-                        });
+                        }); */
                     }
                     else {
                         res.status(500).set('application/json')
@@ -285,7 +285,8 @@ module.exports.updateUser = (req,res,next)=>{
         User.findByIdAndUpdate(req.params.userId,{
             firstname:req.body.firstname,
             lastname:req.body.lastname,
-            userImage:req.file.path
+            userImage:req.file.path,
+            phoneNumber:req.body.phoneNumber
         },(error,response)=>{
             if(error) {
                 res.status(500).set('application/json')
@@ -388,4 +389,64 @@ module.exports.tokenValidation = (req,res,next)=>{
             }
         });
     }
+}
+
+module.exports.loginViaOtp = (req,res,next)=>{
+    
+    sendOtp.send(req.body.phoneNumber,"SHOTEL",(err,data)=>{
+        if(err) console.log(err);
+        else {
+            sendOtp.setOtpExpiry('5');
+            res.status(200).set('application/json')
+            .json({
+                result: true,
+                data:data
+            });
+        }
+    });
+}
+
+module.exports.viaOTP = (req,res,next)=>{
+    sendOtp.verify(req.body.phoneNumber,req.body.otp,(error,data)=>{
+        if(error) {
+            res.status(500).set('application/json')
+            .json({
+                error:error
+            });
+        }
+        else {
+            if(data.type == "success") {
+                User.findOne({phoneNumber:req.body.phoneNumber},(error,respo)=>{
+                    if(error) {
+                        res.status(500).set('application/json')
+                        .json({
+                            error:error
+                        });
+                    }
+                    else if(!respo) {
+                        res.status(404).set('application/json')
+                        .json({
+                            message: "No user found"
+                        });
+                    }
+                    else {
+                        var token = jwt.sign({_id:respo._id},CONFIG.SECRETKEY,{expiresIn:"24h"});
+                        res.status(200).set('application/json')
+                        .json({
+                            auth:true,
+                            message:"Login Successfull",
+                            token:token,
+                            user:respo
+                        });
+                    }
+                });
+            }
+            else {
+                res.status(404).set('application/json')
+                .json({
+                    message: "Wrong otp please try again"
+                });
+            }
+        }
+    })
 }
