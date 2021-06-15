@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "mocha",
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "nodemon sever.js"
   },
   "keywords": [
     "HotelSERVER"
@@ -13,12 +14,11 @@
   "author": "subash",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^3.0.2",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "dotenv": "^6.2.0",
     "express": "^4.16.4",
     "jsonwebtoken": "^8.4.0",
-    "log4js": "^3.0.6",
     "mongodb": "^3.1.10",
     "mongoose": "^5.3.13",
     "multer": "^1.4.1",

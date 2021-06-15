@@ -1,29 +1,19 @@
-const CONFIG = require('../config/config.js')
 const mongoose = require('mongoose');
-require('./user.model.js');
-require('./hotel.model');
+const config = require('../config/config');
 
-const log4js = require('log4js');
-const log4jsConf = require('../config/log4jsConf.json');
-log4js.configure(log4jsConf);
-var dbLogger = log4js.getLogger('db');
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(config.DBURL, {
+      useUnifiedTopology: true,
+      useNewUrlParser: true,
+      useCreateIndex: true,
+    });
 
-var options = {
-    user : CONFIG.DBUSER,
-    pass:CONFIG.dbPass,
-    authSource:CONFIG.AUTHSOURCE,
-    useNewUrlParser: true
-}
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (e) {
+    console.error(`Error: ${e.message}`.red.underline.bold);
+    process.exit(1);
+  }
+};
 
-mongoose.connect(CONFIG.DBURL,options);
-var db = mongoose.connection;
-db.on('error',(err)=>{
-    dbLogger.info("DB Connection Failed via Mongoose");
-    console.log(err);
-    
-})
-db.once('open',()=>{
-    dbLogger.info("DB Connection Successfull via Mongoose");
-    console.log("DB Connection Successfull via Mongoose");
-      
-})
+module.exports = connectDB;
