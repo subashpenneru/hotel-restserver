@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var hotelCtrl = require('../controller/hotel.controller');
-var userCtrl = require('../controller/user.controller');
 
 router.route('/hotels').get(hotelCtrl.getAllHotels);
 
