@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const CONFIG = require('../config/config');
 const multer = require('multer');
-const nodemailer = require('nodemailer');
 
 // OTPLIB
 var otplib = require('otplib');
@@ -193,26 +192,19 @@ module.exports.getImage = async (req, res, next) => {
   res.json(user.userImage);
 };
 
-module.exports.updateRegUser = (req, res, next) => {
-  console.log(req.body.isActive);
+module.exports.updateRegUser = async (req, res, next) => {
+  const { emailId } = req.query;
+  const { isActive } = req.body;
 
-  User.findByIdAndUpdate(
-    req.query.emailId,
-    {
-      isActive: req.body.isActive,
-    },
-    (error, resp) => {
-      if (error) {
-        res.status(500).set('application/json').json({
-          error: error,
-        });
-      } else {
-        res.status(200).set('application/json').json({
-          response: resp,
-        });
-      }
-    }
-  );
+  const res = await User.findByIdAndUpdate(emailId, { isActive });
+
+  if (!res) {
+    return res.status(404).json({ error: 'User Not found' });
+  }
+
+  return res.status(200).json({
+    response: res,
+  });
 };
 
 module.exports.tokenValidation = (req, res, next) => {
