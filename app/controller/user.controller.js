@@ -196,14 +196,14 @@ module.exports.updateRegUser = async (req, res, next) => {
   const { emailId } = req.query;
   const { isActive } = req.body;
 
-  const res = await User.findByIdAndUpdate(emailId, { isActive });
+  const user = await User.findByIdAndUpdate(emailId, { isActive });
 
-  if (!res) {
+  if (!user) {
     return res.status(404).json({ error: 'User Not found' });
   }
 
   return res.status(200).json({
-    response: res,
+    response: user,
   });
 };
 
