@@ -171,7 +171,7 @@ module.exports.updateUser = async (req, res, next) => {
     obj.userImage = req.file.path;
   }
 
-  const user = await User.findByIdAndUpdate(userId, obj);
+  const user = await User.findByIdAndUpdate(userId, obj, { new: true });
 
   res.json(user);
 };
