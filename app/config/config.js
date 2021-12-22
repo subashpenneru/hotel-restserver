@@ -1,7 +1,9 @@
 var host = '127.0.0.1';
 
 // const dbUrl = 'mongodb://127.0.0.1:27017/bot';
-const dbUrl = process.env.MONGO_URI;
+const dbUrl =
+  process.env.MONGO_URI ||
+  'mongodb+srv://rootuser:root@mlab.sjox9.mongodb.net/bot?retryWrites=true&w=majority';
 
 const authSource = 'bot';
 const dbUser = 'rootuser';
