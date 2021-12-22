@@ -29,6 +29,6 @@ app.use(function (req, res, next) {
 app.use('/api', userRoutes);
 app.use('/api', hotelRoutes);
 
-app.listen(CONFIG.PORT, () => {
+app.listen(process.env.PORT, process.env.HOST, () => {
   console.log(`Server is Running`);
 });
