@@ -1,9 +1,7 @@
 var host = '127.0.0.1';
-var port = 3030;
 
 // const dbUrl = 'mongodb://127.0.0.1:27017/bot';
-const dbUrl =
-  'mongodb+srv://rootuser:root@mlab.sjox9.mongodb.net/bot?retryWrites=true&w=majority';
+const dbUrl = process.env.MONGO_URI;
 
 const authSource = 'bot';
 const dbUser = 'rootuser';
@@ -14,7 +12,7 @@ const password = 'nani1995subash';
 
 module.exports = {
   HOST: host,
-  PORT: port,
+  PORT: process.env.PORT,
   DBURL: dbUrl,
   AUTHSOURCE: authSource,
   DBUSER: dbUser,

@@ -7,6 +7,9 @@ var bookingHistorySchema = mongoose.Schema({
   hotelName: String,
   bookingDate: Date,
   price: String,
+  hotelId: String,
+  noOfRooms: Number,
+  currency: String,
 });
 
 var userSchema = mongoose.Schema({

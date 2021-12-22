@@ -29,6 +29,6 @@ app.use(function (req, res, next) {
 app.use('/api', userRoutes);
 app.use('/api', hotelRoutes);
 
-app.listen(CONFIG.PORT, CONFIG.HOST, () => {
-  console.log(`Server is Running at http://${CONFIG.HOST}:${CONFIG.PORT}`);
+app.listen(CONFIG.PORT, () => {
+  console.log(`Server is Running`);
 });

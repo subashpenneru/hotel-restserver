@@ -1,115 +1,110 @@
-var Hotel = require('../models/hotel.model');
-var User = require('../models/user.model');
+const moment = require('moment-timezone');
+const Hotel = require('../models/hotel.model');
+const User = require('../models/user.model');
 
-module.exports.getAllHotels = (req, res, next) => {
-  Hotel.find().exec((error, response) => {
-    if (error) {
-      res.status(404).set('application/json').json({
-        message: 'Hotels Record not found',
-      });
+const getAllHotels = async (req, res, next) => {
+  const { city } = req.query;
+
+  const hotels = await Hotel.find({});
+
+  if (hotels && hotels.length > 0) {
+    if (city) {
+      const response = hotels.filter(({ location }) =>
+        location && location.address && location.address.includes(city)
+          ? true
+          : false
+      );
+
+      res.json({ hotels: response, totalRecords: response.length });
     } else {
-      let requiredHotels = [];
-      var city = {
-        hotels: requiredHotels,
-      };
-      if (req.query && req.query.city) {
-        for (h of response) {
-          if (h.location.address.includes(req.query.city)) {
-            requiredHotels.push(h);
-          }
-        }
-        if (requiredHotels.length > 0) {
-          res.status(200).set('application/json').json(city);
-        } else {
-          res.status(404).set('application/json').json({
-            message: 'No Hotels Found',
-          });
-        }
-      } else {
-        res.status(200).set('application/json').json(response);
-      }
+      res.json({ hotels: hotels, totalRecords: hotels.length });
     }
-  });
+  } else {
+    res.status(404).json({
+      message: 'No Hotels Found',
+    });
+  }
 };
 
-module.exports.getOneHotel = (req, res, next) => {
-  if (req.params && req.params.hotelId) {
-    Hotel.findById(req.params.hotelId).exec((error, hotel) => {
-      if (error) {
-        res.status(404).set('application/json').json({
-          error: error,
-          message: 'Internal error',
-        });
-      } else if (!hotel) {
-        res.status(401).set('application/json').json({
-          message: 'Hotel records not found',
-        });
-      } else {
-        res.status(200).set('application/json').json(hotel);
+const getOneHotel = async (req, res, next) => {
+  const { hotelId } = req.params;
+
+  if (hotelId) {
+    try {
+      const hotel = await Hotel.findById(hotelId);
+
+      if (!hotel) {
+        res.status(404).json({ message: 'No Hotel Found!' });
       }
-    });
+
+      res.json(hotel);
+    } catch (error) {
+      res.status(404).json({ message: 'Invalid hotel id' });
+    }
   } else {
-    res.status(500).set('appliaction/json').json({
+    res.status(500).json({
       message: 'Id not Found',
     });
   }
 };
 
-module.exports.bookHotel = (req, res, next) => {
-  hotelId = req.params.hotelId;
-  userId = req.params.userId;
+const bookHotel = async (req, res, next) => {
+  const { hotelId, userId } = req.params;
+  const { userName, email, mobile, roomNumber, noOfRooms } = req.body;
+  const roomNo = roomNumber
+    ? Number(roomNumber) >= 0
+      ? Number(roomNumber)
+      : 0
+    : 0;
 
-  findOneHotelOneUser(hotelId, userId)
-    .then((data) => {
-      if (data.user._id) {
-        User.findOneAndUpdate(
-          { _id: data.user._id },
-          {
-            $push: {
-              bookingHistory: {
-                userName: req.body.userName,
-                emailId: req.body.email,
-                phNo: req.body.mobile,
-                hotelName: data.hotel.name,
-                bookingDate: new Date(),
-                price: data.hotel.rooms[0].price,
-              },
-            },
+  const { hotel, user } = await findOneHotelOneUser(hotelId, userId);
+
+  if (user._id) {
+    const response = await User.findOneAndUpdate(
+      { _id: user._id },
+      {
+        $push: {
+          bookingHistory: {
+            userName,
+            emailId: email,
+            phNo: mobile,
+            hotelName: hotel.name,
+            bookingDate: moment.utc().format(),
+            price: hotel.rooms[Number(roomNo)].price * noOfRooms,
+            noOfRooms,
+            hotelId,
+            currency: hotel.currency,
           },
-          { new: true },
-          (err, doc) => {
-            if (err) {
-              res.status(500).set('application/json').json({
-                error: err,
-                message: 'Booking is not completed due to server error',
-              });
-            } else {
-              res.status(200).set('application/json').json({
-                response: true,
-                result: doc,
-                message: 'Booking Completed !',
-              });
-            }
-          }
-        );
-      } else {
-        res.status(404).set('application/json').json({
-          message: 'user not found for booking',
-        });
-      }
-    })
-    .catch((error) => {});
+        },
+      },
+      { new: true }
+    );
+
+    if (!response) {
+      res.status(500).json({
+        message: 'Booking is not completed due to server error',
+      });
+    }
+
+    res.json({ message: 'Booking Completed!', result: response });
+  } else {
+    res.status(404).json({
+      message: 'user not found for booking',
+    });
+  }
 };
 
 async function findOneHotelOneUser(hotelId, userId) {
   if (!hotelId) throw new Error('Hotel Id not Found');
   if (!userId) throw new Error('user Id not Found');
 
-  var hotel = await Hotel.findById(hotelId);
-  var user = await User.findById(userId);
+  const hotel = await Hotel.findById(hotelId);
+  const user = await User.findById(userId);
 
   return {
-    hotel: hotel,
-    user: user,
+    hotel,
+    user,
   };
 }
+
+module.exports = { getAllHotels, getOneHotel, bookHotel };
