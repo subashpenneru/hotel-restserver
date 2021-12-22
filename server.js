@@ -30,5 +30,5 @@ app.use('/api', userRoutes);
 app.use('/api', hotelRoutes);
 
 app.listen(CONFIG.PORT, () => {
-  console.log(`Server is Running at http://${process.env.HOST}:${CONFIG.PORT}`);
+  console.log(`Server is Running`);
 });
