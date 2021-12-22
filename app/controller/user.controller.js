@@ -26,7 +26,7 @@ module.exports.register = async (req, res, next) => {
     });
   }
 
-  if (userImage === 'null') {
+  if (userImage == 'undefined') {
     req.file = {
       fieldname: 'userImage',
       originalname: 'khaleesi.jpg',
@@ -41,6 +41,15 @@ module.exports.register = async (req, res, next) => {
 
   const salt = await bcrypt.genSalt(10);
   const hashPwd = await bcrypt.hash(password, salt);
+
+  const existingUser = await User.find({ email });
+
+  if (existingUser) {
+    return res.status(404).json({
+      message: `Already user exists with email: ${email}, Please login`,
+    });
+  }
+
   const user = new User({
     firstname,
     lastname,
@@ -148,7 +157,7 @@ module.exports.fileFilter = (req, file, cb) => {
 
 module.exports.updateUser = async (req, res, next) => {
   const { userId } = req.params;
-  const { userImage, firstname, lastname, phoneNumber } = req.body;
+  const { firstname, lastname, phoneNumber } = req.body;
 
   if (!userId) {
     res.status(404).json({
@@ -156,26 +165,13 @@ module.exports.updateUser = async (req, res, next) => {
     });
   }
 
-  if (typeof userImage === 'string') {
-    oName = userImage.split('/');
-    req.file = {
-      fieldname: 'userImage',
-      originalname: oName[1],
-      encoding: '7bit',
-      mimetype: 'image/jpeg',
-      destination: './uploads',
-      filename: '2018-12-02T02:16:06.010Zkhaleesi.jpg',
-      path: userImage,
-      size: 73151,
-    };
+  const obj = { firstname, lastname, phoneNumber };
+
+  if (req.file?.path) {
+    obj.userImage = req.file.path;
   }
 
-  const user = await User.findByIdAndUpdate(userId, {
-    firstname,
-    lastname,
-    userImage: req.file.path,
-    phoneNumber,
-  });
+  const user = await User.findByIdAndUpdate(userId, obj);
 
   res.json(user);
 };

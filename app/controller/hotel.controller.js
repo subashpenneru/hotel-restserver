@@ -30,13 +30,17 @@ const getOneHotel = async (req, res, next) => {
   const { hotelId } = req.params;
 
   if (hotelId) {
-    const hotel = await Hotel.findById(hotelId);
+    try {
+      const hotel = await Hotel.findById(hotelId);
 
-    if (!hotel) {
-      res.status(404).json({ message: 'No Hotel Found!' });
+      if (!hotel) {
+        res.status(404).json({ message: 'No Hotel Found!' });
+      }
+
+      res.json(hotel);
+    } catch (error) {
+      res.status(404).json({ message: 'Invalid hotel id' });
     }
-
-    res.json(hotel);
   } else {
     res.status(500).json({
       message: 'Id not Found',
@@ -46,7 +50,7 @@ const getOneHotel = async (req, res, next) => {
 
 const bookHotel = async (req, res, next) => {
   const { hotelId, userId } = req.params;
-  const { userName, email, mobile, roomNumber } = req.body;
+  const { userName, email, mobile, roomNumber, noOfRooms } = req.body;
   const roomNo = roomNumber
     ? Number(roomNumber) >= 0
       ? Number(roomNumber)
@@ -66,7 +70,10 @@ const bookHotel = async (req, res, next) => {
             phNo: mobile,
             hotelName: hotel.name,
             bookingDate: moment.utc().format(),
-            price: hotel.rooms[Number(roomNo)].price,
+            price: hotel.rooms[Number(roomNo)].price * noOfRooms,
+            noOfRooms,
+            hotelId,
+            currency: hotel.currency,
           },
         },
       },
