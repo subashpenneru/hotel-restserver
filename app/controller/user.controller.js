@@ -44,7 +44,7 @@ module.exports.register = async (req, res, next) => {
 
   const existingUser = await User.find({ email });
 
-  if (existingUser) {
+  if (existingUser && existingUser.length > 0) {
     return res.status(404).json({
       message: `Already user exists with email: ${email}, Please login`,
     });
